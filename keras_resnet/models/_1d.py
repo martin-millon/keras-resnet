@@ -125,10 +125,16 @@ class ResNet1D(tensorflow.keras.Model):
         classes=1000,
         freeze_bn=True,
         numerical_names=None,
+        batch_norm = True,
+        inifinite_training = False,
         *args,
         **kwargs
     ):
-        axis = 1
+        print('modified version of REsnet1d')
+        if inifinite_training:
+            axis = 2
+        else:
+            axis = 1
 
         if numerical_names is None:
             numerical_names = [True] * len(blocks)
@@ -139,7 +145,8 @@ class ResNet1D(tensorflow.keras.Model):
         x = tensorflow.keras.layers.ZeroPadding1D(padding=3, name="padding_conv1")(inputs)
         #x = tensorflow.keras.layers.Lambda(audioencoder2_,name='audioconv')(x)
         x = tensorflow.keras.layers.SeparableConv1D(features, 7, strides=2, use_bias=False, name="conv1")(x)
-        x = keras_resnet.layers.BatchNormalization(axis=axis, epsilon=1e-5, freeze=freeze_bn)(x)
+        if batch_norm:
+            x = keras_resnet.layers.BatchNormalization(axis=axis, epsilon=1e-5, freeze=freeze_bn)(x)
         x = tensorflow.keras.layers.Activation("relu", name="conv1_relu")(x)
         
         x = tensorflow.keras.layers.MaxPooling1D(3, strides=2, padding="same", name="pool1")(x)
